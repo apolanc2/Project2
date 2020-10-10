@@ -605,12 +605,8 @@ body {
 <h1 id="data">Data</h1>
 <p>Read in the data! Filter for the weekday of interest!</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(dplyr)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">library</span>(caret)</span></code></pre></div>
-<pre><code>## Loading required package: lattice
-
-## Loading required package: ggplot2
-</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>data &lt;-<span class="st"> </span>readr<span class="op">::</span><span class="kw">read_csv</span>(<span class="st">&quot;C:/Users/nelso/Documents/NCSU/ST 558/Project2/OnlineNewsPopularity.csv&quot;</span>)</span></code></pre></div>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">library</span>(caret)</span>
+<span id="cb1-3"><a href="#cb1-3"></a>data &lt;-<span class="st"> </span>readr<span class="op">::</span><span class="kw">read_csv</span>(<span class="st">&quot;C:/Users/nelso/Documents/NCSU/ST 558/Project2/OnlineNewsPopularity.csv&quot;</span>)</span></code></pre></div>
 <pre><code>## Parsed with column specification:
 ## cols(
 ##   .default = col_double(),
@@ -619,8 +615,8 @@ body {
 
 ## See spec(...) for full column specifications.
 </code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>data &lt;-<span class="st"> </span>data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(weekday_is_monday<span class="op">==</span><span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span><span class="kw">starts_with</span>(<span class="st">&quot;weekday&quot;</span>))</span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="kw">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>data &lt;-<span class="st"> </span>data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(weekday_is_monday<span class="op">==</span><span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span><span class="kw">starts_with</span>(<span class="st">&quot;weekday&quot;</span>))</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="kw">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div>
 
 </body>
 </html>

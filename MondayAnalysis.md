@@ -10,13 +10,6 @@ Read in the data\! Filter for the weekday of interest\!
 ``` r
 library(dplyr)
 library(caret)
-```
-
-    ## Loading required package: lattice
-
-    ## Loading required package: ggplot2
-
-``` r
 data <- readr::read_csv("C:/Users/nelso/Documents/NCSU/ST 558/Project2/OnlineNewsPopularity.csv")
 ```
 
