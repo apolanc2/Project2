@@ -1,0 +1,174 @@
+---
+title: "Monday Analysis"
+author: "Ariana Polanco"
+date: "10/10/2020"
+output: rmarkdown::github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data
+Read in the data!
+Filter for the weekday of interest!
+
+```{r data}
+library(dplyr)
+library(caret)
+data <- readr::read_csv("C:/Users/nelso/Documents/NCSU/ST 558/Project2/OnlineNewsPopularity.csv")
+
+#day <- 
+#params = lapply(teamIDs, FUN = function(x){list(team = x)})
+
+data <- data %>% filter(weekday_is_monday==1) %>% select(-starts_with("weekday"))
+set.seed(123)
+train <- sample(1:nrow(data), size = nrow(data)*0.7)
+test <- setdiff(1:nrow(diamonds), train)
+dataTrain <- data[train,]
+dataTest <- data[test,]
+```
+
+# Data Exploration
+
+```{r eda}
+library(gridExtra)
+library(purrr)
+library(tidyr)
+head(data)
+summary(data)
+
+# create a new variable "dataType" to be able to graph the frequency of the data channel type. 
+data <- mutate(data,dataType = ifelse((data_channel_is_lifestyle + data_channel_is_lifestyle + data_channel_is_bus +                                   data_channel_is_socmed + data_channel_is_tech + data_channel_is_world) == 0, NA, 
+                            ifelse((data_channel_is_lifestyle + data_channel_is_lifestyle + data_channel_is_bus +                                       data_channel_is_socmed + data_channel_is_tech + data_channel_is_world) != 1 , "Multi",
+                             ifelse(data_channel_is_lifestyle == 1, "Lifestyle",
+                            ifelse(data_channel_is_entertainment ==1, "Entertainment",
+                            ifelse(data_channel_is_bus == 1, "Business", 
+                            ifelse(data_channel_is_socmed==1, "Social Media", 
+                            ifelse(data_channel_is_tech ==1, "Tech", 
+                            ifelse(data_channel_is_world ==1, "World", NA)))))))))
+
+table(data$dataType)
+g <- ggplot(data=data, aes(x=dataType))
+g + geom_bar()
+
+# correlation for numeric data
+correlations <- cor(select_if(data,is.numeric))
+# too much to plot, used https://towardsdatascience.com/how-to-create-a-correlation-matrix-with-too-many-variables-309cc0c0a57 as a resource to cut it down
+# remove duplicates
+correlations[lower.tri(correlations,diag=TRUE)] <- NA
+# remove perfect correlations
+correlations[correlations==1] <- NA
+# create a nice table
+correlations <- as.data.frame(as.table(correlations))
+# remove NA values
+correlations <- na.omit(correlations)
+# order by descending absolute value 
+correlations <- correlations[order(-abs(correlations$Freq)),]
+# Take a look at just the shares correlations
+correlations %>% filter(Var2=="shares")
+# all correlations
+print(correlations)
+# try to avoid any combination of variables that have a high correlation in a model. Especially in this case where there is overlap between variables.
+
+# Plot some counts vs the shares variable
+p <- ggplot(data=data, aes(y=shares))
+p1 <- p + geom_jitter(aes(x=n_tokens_title))
+p2 <- p + geom_jitter(aes(x=n_tokens_content))
+p3 <- p + geom_jitter(aes(x=num_imgs))
+p4 <- p + geom_jitter(aes(x=num_videos))
+grid.arrange(p1,p2,p3,p4)
+
+# positive vs negative words and the share variable
+w1 <- p + geom_jitter(aes(x=global_rate_positive_words))
+w2 <- p + geom_jitter(aes(x=global_rate_negative_words))
+grid.arrange(w1,w2)
+
+# look at the higher correlations?
+r1 <- p + geom_jitter(aes(x=self_reference_min_shares))
+r2 <- p + geom_jitter(aes(x=self_reference_avg_sharess))
+r3 <- p + geom_jitter(aes(x=kw_avg_avg	))
+r4 <- p + geom_jitter(aes(x=avg_negative_polarity))
+grid.arrange(r1,r2,r3,r4)
+
+# not seeing any great trends
+
+# plot all variables at once: https://drsimonj.svbtle.com/quick-plot-of-all-variables
+# histograms
+data[1:20] %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+    facet_wrap(~ key, scales = "free") +
+    geom_histogram()
+data[21:40] %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+    facet_wrap(~ key, scales = "free") +
+    geom_histogram()
+data[41:55] %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+    facet_wrap(~ key, scales = "free") +
+    geom_histogram()
+
+```
+
+
+# Modeling
+
+``` {r tree, cache = TRUE}
+library(caret)
+library(gbm)
+ct1 <- train(shares ~ n_tokens_content + n_tokens_title + num_imgs + num_videos , 
+             data = dataTrain, method = "rpart", 
+             trControl = trainControl(method="LOOCV"),
+            preProcess = c("center","scale"))
+ct1
+ct2 <- train(shares ~ self_reference_min_shares + kw_avg_avg + num_imgs + num_videos , 
+             data = dataTrain, method = "rpart", 
+             trControl = trainControl(method="LOOCV"),
+             preProcess = c("center","scale"))
+ct2
+ct3 <- train(shares ~ num_keywords + global_rate_positive_words + title_subjectivity + is_weekend , 
+             data = dataTrain, method = "rpart", 
+            trControl = trainControl(method="LOOCV"),
+                 preProcess = c("center","scale"))
+ct3
+# ct2 has the smallest rmse
+```
+``` {r boosttree, cache = TRUE}
+bt1 <- train(shares ~ n_tokens_content + n_tokens_title + num_imgs + num_videos , 
+             data = dataTrain, method = "gbm",  
+             trControl = trainControl(method="cv"),
+             preProcess = c("center","scale"))
+bt1
+bt2 <- train(shares ~ self_reference_min_shares + kw_avg_avg + num_imgs + num_videos , 
+             data = dataTrain, method = "gbm", trControl = trainControl(method="cv"),
+             preProcess = c("center","scale"))
+bt2
+bt3 <- train(shares ~ num_keywords + global_rate_positive_words + title_subjectivity + is_weekend ,
+             data = dataTrain, method = "gbm", trControl = trainControl(method="cv"),
+                 preProcess = c("center","scale"))
+bt3
+
+# bt1 has the smallest rmse
+```
+
+```{r compare}
+test_pred_ct <- predict(ct2, newdata = dataTest)
+test_pred_boost <- predict(bt1, newdata = dataTest)
+
+# How well is the model predicting survived?
+# create confusion matrices for each model
+dataTest <- dataTest %>% na.omit(shares)
+#confMat_ct <- confusionMatrix(test_pred_ct, dataTest$shares)
+#confMat_boost <- confusionMatrix(test_pred_boost, dataTest$shares)
+
+# grab the results from each matrix
+#allResults <- round(data.frame(confMat_ct$overall,confMat_boost$overall),4)
+#colnames(allResults) <- c("Classification Tree", "Boosted Tree")
+
+```
