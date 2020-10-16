@@ -614,7 +614,7 @@ body {
 <span id="cb1-8"><a href="#cb1-8"></a>                        <span class="kw">if_else</span>(data<span class="op">$</span>weekday_is_friday <span class="op">==</span><span class="dv">1</span>, <span class="st">&quot;Friday&quot;</span>,</span>
 <span id="cb1-9"><a href="#cb1-9"></a>                          <span class="kw">if_else</span>(data<span class="op">$</span>weekday_is_saturday <span class="op">==</span><span class="dv">1</span>, <span class="st">&quot;Saturday&quot;</span>, <span class="st">&quot;Sunday&quot;</span></span>
 <span id="cb1-10"><a href="#cb1-10"></a>                 ))))))</span>
-<span id="cb1-11"><a href="#cb1-11"></a>data &lt;-<span class="st"> </span>data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(weekday<span class="op">==</span>params<span class="op">$</span>days) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span><span class="kw">starts_with</span>(<span class="st">&quot;weekday&quot;</span>))</span>
+<span id="cb1-11"><a href="#cb1-11"></a>data &lt;-<span class="st"> </span>data <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(weekday<span class="op">==</span>params<span class="op">$</span>day) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">select</span>(<span class="op">-</span><span class="kw">starts_with</span>(<span class="st">&quot;weekday&quot;</span>))</span>
 <span id="cb1-12"><a href="#cb1-12"></a><span class="kw">set.seed</span>(<span class="dv">123</span>)</span>
 <span id="cb1-13"><a href="#cb1-13"></a>train &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(data), <span class="dt">size =</span> <span class="kw">nrow</span>(data)<span class="op">*</span><span class="fl">0.7</span>)</span>
 <span id="cb1-14"><a href="#cb1-14"></a>test &lt;-<span class="st"> </span><span class="kw">setdiff</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">nrow</span>(diamonds), train)</span>
@@ -3224,7 +3224,7 @@ body {
 <pre><code>##   Classification Tree Boosted Tree
 ## 1            16820.86     16848.91
 </code></pre>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>minRMSE &lt;-<span class="st"> </span><span class="kw">colnames</span>(rmse)[<span class="kw">apply</span>(rmse,<span class="dv">1</span>,which.min)]</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>minRMSE &lt;-<span class="st"> </span><span class="kw">colnames</span>(rmse)[<span class="kw">apply</span>(rmse,<span class="dv">1</span>,which.min)] </span></code></pre></div>
 <p>Our models are not very good, but the better model is <code>minRMSE</code>.</p>
 
 </body>

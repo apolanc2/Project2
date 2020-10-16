@@ -2721,7 +2721,7 @@ rmse
     ## 1            16382.66      16513.7
 
 ``` r
-minRMSE <- colnames(rmse)[apply(rmse,1,which.min)]
+minRMSE <- colnames(rmse)[apply(rmse,1,which.min)] 
 ```
 
 Our models are not very good, but the better model is `minRMSE`.

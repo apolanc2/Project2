@@ -18,7 +18,7 @@ data$weekday <- if_else(data$weekday_is_monday ==1 , "Monday",
                         if_else(data$weekday_is_friday ==1, "Friday",
                           if_else(data$weekday_is_saturday ==1, "Saturday", "Sunday"
                  ))))))
-data <- data %>% filter(weekday==params$days) %>% select(-starts_with("weekday"))
+data <- data %>% filter(weekday==params$day) %>% select(-starts_with("weekday"))
 set.seed(123)
 train <- sample(1:nrow(data), size = nrow(data)*0.7)
 test <- setdiff(1:nrow(diamonds), train)
@@ -2721,7 +2721,7 @@ rmse
     ## 1            8514.331     8448.403
 
 ``` r
-minRMSE <- colnames(rmse)[apply(rmse,1,which.min)]
+minRMSE <- colnames(rmse)[apply(rmse,1,which.min)] 
 ```
 
 Our models are not very good, but the better model is `minRMSE`.

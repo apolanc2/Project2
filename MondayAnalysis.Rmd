@@ -181,7 +181,7 @@ rmse_boost <- sqrt(mean((residuals_boost)^2))
 rmse <- data.frame(rmse_ct,rmse_boost)
 colnames(rmse) <- c("Classification Tree", "Boosted Tree")
 rmse
-minRMSE <- colnames(rmse)[apply(rmse,1,which.min)]
+minRMSE <- colnames(rmse)[apply(rmse,1,which.min)] 
 ```
 
 Our models are not very good, but the better model is `minRMSE`.
