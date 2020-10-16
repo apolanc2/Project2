@@ -4,7 +4,7 @@ To do this we set up our parameters and knitted our project with the code below!
 
 ```{r setpar}    
 #create the weekday variable that we are going to use to render the project!    
-data <- readr::read_csv("C:/Users/nelso/Documents/NCSU/ST 558/Project2/OnlineNewsPopularity.csv")    
+data <- readr::read_csv(".../OnlineNewsPopularity.csv")    
 data$weekday <- if_else(data$weekday_is_monday ==1 , "Monday",    
                         if_else(data$weekday_is_tuesday == 1, "Tuesday",    
                                 if_else(data$weekday_is_wednesday ==1, "Wednesday",    
