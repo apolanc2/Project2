@@ -11,11 +11,18 @@ Read in the data\! Filter for the weekday of interest\!
 library(dplyr)
 library(caret)
 data <- readr::read_csv("C:/Users/nelso/Documents/NCSU/ST 558/Project2/OnlineNewsPopularity.csv")
-
-#day <- 
-#params = lapply(teamIDs, FUN = function(x){list(team = x)})
-
-data <- data %>% filter(weekday_is_monday==1) %>% select(-starts_with("weekday"))
+data$weekday <- if_else(data$weekday_is_monday ==1 , "Monday",
+                  if_else(data$weekday_is_tuesday == 1, "Tuesday",
+                    if_else(data$weekday_is_wednesday ==1, "Wednesday",
+                      if_else(data$weekday_is_thursday ==1, "Thursday",
+                        if_else(data$weekday_is_friday ==1, "Friday",
+                          if_else(data$weekday_is_saturday ==1, "Saturday", "Sunday"
+                 ))))))
+#day <- unique(data$weekday)
+#output_file <- paste0(day,"Analysis.md")
+#params = lapply(day, FUN = function(x){list(days = x)})
+#reports <- tibble(output_file,params)
+data <- data %>% filter(weekday==params$days) %>% select(-starts_with("weekday"))
 set.seed(123)
 train <- sample(1:nrow(data), size = nrow(data)*0.7)
 test <- setdiff(1:nrow(diamonds), train)
