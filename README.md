@@ -3,7 +3,7 @@ This project requires some automation! We created an .md file for each day of th
 To do this we set up our parameters and knitted our project with the code below!
 
 ```{r setpar}
-# create the weekday variable that we are going to use to render the project!
+#create the weekday variable that we are going to use to render the project!
 data <- readr::read_csv("C:/Users/nelso/Documents/NCSU/ST 558/Project2/OnlineNewsPopularity.csv")
 data$weekday <- if_else(data$weekday_is_monday ==1 , "Monday",
                         if_else(data$weekday_is_tuesday == 1, "Tuesday",
@@ -12,13 +12,13 @@ data$weekday <- if_else(data$weekday_is_monday ==1 , "Monday",
                                                 if_else(data$weekday_is_friday ==1, "Friday",
                                                         if_else(data$weekday_is_saturday ==1, "Saturday", "Sunday"
                                                         ))))))
-# set up the parameters
+#set up the parameters
 day <- unique(data$weekday)
 output_file <- paste0(day,"Analysis.md")
 params = lapply(day, FUN = function(x){list(days = x)})
 reports <- tibble(output_file,params)
 
-# knit our rmarkdown with parameters!!
+#knit our rmarkdown with parameters!!
 library(rmarkdown)
 apply(reports, MARGIN = 1,
       FUN = function(x){
