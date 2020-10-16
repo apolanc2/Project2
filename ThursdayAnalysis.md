@@ -2403,6 +2403,10 @@ rmse
 
 ``` r
 minRMSE <- colnames(rmse)[apply(rmse,1,which.min)] 
+minRMSE
 ```
 
-Our models are not very good, but the better model is `minRMSE`.
+    ## [1] "Boosted Tree"
+
+Our models are not very good, but the better model is shown above using
+our `minRMSE` object.

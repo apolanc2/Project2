@@ -8,7 +8,7 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
 # Data
@@ -182,6 +182,7 @@ rmse <- data.frame(rmse_ct,rmse_boost)
 colnames(rmse) <- c("Classification Tree", "Boosted Tree")
 rmse
 minRMSE <- colnames(rmse)[apply(rmse,1,which.min)] 
+minRMSE
 ```
 
-Our models are not very good, but the better model is `minRMSE`.
+Our models are not very good, but the better model is shown above using our `minRMSE` object.

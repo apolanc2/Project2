@@ -2907,8 +2907,11 @@ body {
 <pre><code>##   Classification Tree Boosted Tree
 ## 1            12243.01     12105.92
 </code></pre>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>minRMSE &lt;-<span class="st"> </span><span class="kw">colnames</span>(rmse)[<span class="kw">apply</span>(rmse,<span class="dv">1</span>,which.min)] </span></code></pre></div>
-<p>Our models are not very good, but the better model is <code>minRMSE</code>.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>minRMSE &lt;-<span class="st"> </span><span class="kw">colnames</span>(rmse)[<span class="kw">apply</span>(rmse,<span class="dv">1</span>,which.min)] </span>
+<span id="cb41-2"><a href="#cb41-2"></a>minRMSE</span></code></pre></div>
+<pre><code>## [1] &quot;Boosted Tree&quot;
+</code></pre>
+<p>Our models are not very good, but the better model is shown above using our <code>minRMSE</code> object.</p>
 
 </body>
 </html>
