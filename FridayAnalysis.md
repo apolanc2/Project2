@@ -18,11 +18,7 @@ data$weekday <- if_else(data$weekday_is_monday ==1 , "Monday",
                         if_else(data$weekday_is_friday ==1, "Friday",
                           if_else(data$weekday_is_saturday ==1, "Saturday", "Sunday"
                  ))))))
-#day <- unique(data$weekday)
-#output_file <- paste0(day,"Analysis.md")
-#params = lapply(day, FUN = function(x){list(days = x)})
-#reports <- tibble(output_file,params)
-data <- data %>% filter(weekday==params$days) %>% select(-starts_with("weekday"))
+data <- data %>% filter(weekday==params$day) %>% select(-starts_with("weekday"))
 set.seed(123)
 train <- sample(1:nrow(data), size = nrow(data)*0.7)
 test <- setdiff(1:nrow(diamonds), train)
@@ -31,6 +27,9 @@ dataTest <- data[test,]
 ```
 
 # Data Exploration
+
+I like to look at summary data, correlations, scatter plots, and
+histograms.
 
 ``` r
 library(gridExtra)
@@ -645,6 +644,9 @@ data[41:55] %>%
 
 # Modeling
 
+First a classification tree model using the leave on out cross
+validation.
+
 ``` r
 library(caret)
 library(gbm)
@@ -728,6 +730,10 @@ ct3
 ``` r
 # ct2 has the smallest rmse
 ```
+
+Our second model looks to be the best
+
+Now a boosted tree model using cross validation
 
 ``` r
 bt1 <- train(shares ~ n_tokens_content + n_tokens_title + num_imgs + num_videos , 
@@ -2690,17 +2696,32 @@ bt3
 # bt1 has the smallest rmse
 ```
 
+Our first model had the smalled RMSE.
+
+# Compare
+
+Now lets compare our predictions by comparing the RMSE.
+
 ``` r
-test_pred_ct <- predict(ct2, newdata = dataTest)
+test_pred_ct <- predict(ct2, newdata = dataTest, na.action = na.pass)
 test_pred_boost <- predict(bt1, newdata = dataTest)
 
 # How well is the model predicting survived?
-# create confusion matrices for each model
-dataTest <- dataTest %>% na.omit(shares)
-#confMat_ct <- confusionMatrix(test_pred_ct, dataTest$shares)
-#confMat_boost <- confusionMatrix(test_pred_boost, dataTest$shares)
-
-# grab the results from each matrix
-#allResults <- round(data.frame(confMat_ct$overall,confMat_boost$overall),4)
-#colnames(allResults) <- c("Classification Tree", "Boosted Tree")
+# calculate the RMSE for both models
+residuals_ct <- test_pred_ct-dataTrain$shares
+rmse_ct <- sqrt(mean((residuals_ct)^2))
+residuals_boost <- test_pred_boost-dataTrain$shares
+rmse_boost <- sqrt(mean((residuals_boost)^2))
+rmse <- data.frame(rmse_ct,rmse_boost)
+colnames(rmse) <- c("Classification Tree", "Boosted Tree")
+rmse
 ```
+
+    ##   Classification Tree Boosted Tree
+    ## 1            8365.484     8438.228
+
+``` r
+minRMSE <- colnames(rmse)[apply(rmse,1,which.min)]
+```
+
+Our models are not very good, but the better model is `minRMSE`.
