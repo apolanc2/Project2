@@ -72,8 +72,8 @@ correlations <- na.omit(correlations)
 correlations <- correlations[order(-abs(correlations$Freq)),]
 # Take a look at just the shares correlations
 correlations %>% filter(Var2=="shares")
-# all correlations
-print(correlations)
+# top correlations
+head(correlations,15)
 # try to avoid any combination of variables that have a high correlation in a model. Especially in this case where there is overlap between variables.
 
 # Plot some counts vs the shares variable
