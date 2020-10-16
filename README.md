@@ -1,5 +1,7 @@
 # Project2
-This project requires some automation! We created an .md file for each day of the week for our news data set!
+The Mashable News data set has 60 variables to analyze for trends/predictors for the number of shares for an article.    
+There were variables indicating which day of the week the article was published. We created an .md file for each day of the week for our news data set!  
+Of course we don't want to repeat the process for each day, we want to automate it!
 To do this we set up our parameters and knitted our project with the code below!
 
 ```{r setpar}    
