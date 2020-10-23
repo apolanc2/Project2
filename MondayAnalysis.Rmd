@@ -18,7 +18,7 @@ Filter for the weekday of interest!
 ```{r data}
 library(dplyr)
 library(caret)
-data <- readr::read_csv("C:/Users/nelso/Documents/NCSU/ST 558/Project2/OnlineNewsPopularity.csv")
+data <- readr::read_csv("OnlineNewsPopularity/OnlineNewsPopularity.csv")
 data$weekday <- if_else(data$weekday_is_monday ==1 , "Monday",
                   if_else(data$weekday_is_tuesday == 1, "Tuesday",
                     if_else(data$weekday_is_wednesday ==1, "Wednesday",
@@ -26,7 +26,7 @@ data$weekday <- if_else(data$weekday_is_monday ==1 , "Monday",
                         if_else(data$weekday_is_friday ==1, "Friday",
                           if_else(data$weekday_is_saturday ==1, "Saturday", "Sunday"
                  ))))))
-data <- data %>% filter(weekday==params$day) %>% select(-starts_with("weekday"))
+data <- data %>% filter(weekday==params$days) %>% select(-starts_with("weekday"))
 set.seed(123)
 train <- sample(1:nrow(data), size = nrow(data)*0.7)
 test <- setdiff(1:nrow(diamonds), train)
@@ -186,3 +186,18 @@ minRMSE
 ```
 
 Our models are not very good, but the better model is shown above using our `minRMSE` object.
+
+Adding the linear model for secondary analysis
+```{r lin_model}
+lm1 <- train(shares ~ n_tokens_content + n_tokens_title + num_imgs + num_videos , 
+             data = dataTrain, method = "lm", preProcess = c("center","scale"),
+             trControl = trainControl(method="cv", number = 10))
+lm1$results
+
+#fit on test set
+lmPred <- predict(lm1, newdata = select(dataTest, -shares))
+
+#Compute RMSE
+sqrt(mean(lmPred - dataTest$shares)^2)
+
+```
