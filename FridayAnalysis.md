@@ -10,7 +10,7 @@ Read in the data\! Filter for the weekday of interest\!
 ``` r
 library(dplyr)
 library(caret)
-data <- readr::read_csv("C:/Users/nelso/Documents/NCSU/ST 558/Project2/OnlineNewsPopularity.csv")
+data <- readr::read_csv("OnlineNewsPopularity/OnlineNewsPopularity.csv")
 data$weekday <- if_else(data$weekday_is_monday ==1 , "Monday",
                   if_else(data$weekday_is_tuesday == 1, "Tuesday",
                     if_else(data$weekday_is_wednesday ==1, "Wednesday",
@@ -18,7 +18,7 @@ data$weekday <- if_else(data$weekday_is_monday ==1 , "Monday",
                         if_else(data$weekday_is_friday ==1, "Friday",
                           if_else(data$weekday_is_saturday ==1, "Saturday", "Sunday"
                  ))))))
-data <- data %>% filter(weekday==params$day) %>% select(-starts_with("weekday"))
+data <- data %>% filter(weekday==params$days) %>% select(-starts_with("weekday"))
 set.seed(123)
 train <- sample(1:nrow(data), size = nrow(data)*0.7)
 test <- setdiff(1:nrow(diamonds), train)
@@ -39,25 +39,27 @@ head(data)
 ```
 
     ## # A tibble: 6 x 54
-    ##   url   timedelta n_tokens_title n_tokens_content n_unique_tokens n_non_stop_words n_non_stop_uniq~ num_hrefs
-    ##   <chr>     <dbl>          <dbl>            <dbl>           <dbl>            <dbl>            <dbl>     <dbl>
-    ## 1 http~       727             12              698           0.499             1.00            0.657        13
-    ## 2 http~       727             13              310           0.612             1.00            0.721         4
-    ## 3 http~       727              8              461           0.550             1.00            0.705         8
-    ## 4 http~       727              9              318           0.579             1.00            0.778         7
-    ## 5 http~       727             10              294           0.703             1.00            0.843         4
-    ## 6 http~       727              9              930           0.442             1.00            0.625         7
-    ## # ... with 46 more variables: num_self_hrefs <dbl>, num_imgs <dbl>, num_videos <dbl>, average_token_length <dbl>,
-    ## #   num_keywords <dbl>, data_channel_is_lifestyle <dbl>, data_channel_is_entertainment <dbl>, data_channel_is_bus <dbl>,
-    ## #   data_channel_is_socmed <dbl>, data_channel_is_tech <dbl>, data_channel_is_world <dbl>, kw_min_min <dbl>,
-    ## #   kw_max_min <dbl>, kw_avg_min <dbl>, kw_min_max <dbl>, kw_max_max <dbl>, kw_avg_max <dbl>, kw_min_avg <dbl>,
+    ##   url   timedelta n_tokens_title n_tokens_content n_unique_tokens n_non_stop_words n_non_stop_uniq…
+    ##   <chr>     <dbl>          <dbl>            <dbl>           <dbl>            <dbl>            <dbl>
+    ## 1 http…       727             12              698           0.499             1.00            0.657
+    ## 2 http…       727             13              310           0.612             1.00            0.721
+    ## 3 http…       727              8              461           0.550             1.00            0.705
+    ## 4 http…       727              9              318           0.579             1.00            0.778
+    ## 5 http…       727             10              294           0.703             1.00            0.843
+    ## 6 http…       727              9              930           0.442             1.00            0.625
+    ## # … with 47 more variables: num_hrefs <dbl>, num_self_hrefs <dbl>, num_imgs <dbl>, num_videos <dbl>,
+    ## #   average_token_length <dbl>, num_keywords <dbl>, data_channel_is_lifestyle <dbl>,
+    ## #   data_channel_is_entertainment <dbl>, data_channel_is_bus <dbl>, data_channel_is_socmed <dbl>,
+    ## #   data_channel_is_tech <dbl>, data_channel_is_world <dbl>, kw_min_min <dbl>, kw_max_min <dbl>,
+    ## #   kw_avg_min <dbl>, kw_min_max <dbl>, kw_max_max <dbl>, kw_avg_max <dbl>, kw_min_avg <dbl>,
     ## #   kw_max_avg <dbl>, kw_avg_avg <dbl>, self_reference_min_shares <dbl>, self_reference_max_shares <dbl>,
-    ## #   self_reference_avg_sharess <dbl>, is_weekend <dbl>, LDA_00 <dbl>, LDA_01 <dbl>, LDA_02 <dbl>, LDA_03 <dbl>,
-    ## #   LDA_04 <dbl>, global_subjectivity <dbl>, global_sentiment_polarity <dbl>, global_rate_positive_words <dbl>,
-    ## #   global_rate_negative_words <dbl>, rate_positive_words <dbl>, rate_negative_words <dbl>, avg_positive_polarity <dbl>,
-    ## #   min_positive_polarity <dbl>, max_positive_polarity <dbl>, avg_negative_polarity <dbl>, min_negative_polarity <dbl>,
-    ## #   max_negative_polarity <dbl>, title_subjectivity <dbl>, title_sentiment_polarity <dbl>, abs_title_subjectivity <dbl>,
-    ## #   abs_title_sentiment_polarity <dbl>, shares <dbl>
+    ## #   self_reference_avg_sharess <dbl>, is_weekend <dbl>, LDA_00 <dbl>, LDA_01 <dbl>, LDA_02 <dbl>,
+    ## #   LDA_03 <dbl>, LDA_04 <dbl>, global_subjectivity <dbl>, global_sentiment_polarity <dbl>,
+    ## #   global_rate_positive_words <dbl>, global_rate_negative_words <dbl>, rate_positive_words <dbl>,
+    ## #   rate_negative_words <dbl>, avg_positive_polarity <dbl>, min_positive_polarity <dbl>,
+    ## #   max_positive_polarity <dbl>, avg_negative_polarity <dbl>, min_negative_polarity <dbl>,
+    ## #   max_negative_polarity <dbl>, title_subjectivity <dbl>, title_sentiment_polarity <dbl>,
+    ## #   abs_title_subjectivity <dbl>, abs_title_sentiment_polarity <dbl>, shares <dbl>
 
 ``` r
 summary(data)
@@ -70,69 +72,83 @@ summary(data)
     ##                     Mean   :353   Mean   :10.39   Mean   : 528.2   Mean   :0.5362   Mean   :0.9714  
     ##                     3rd Qu.:545   3rd Qu.:12.00   3rd Qu.: 692.0   3rd Qu.:0.6142   3rd Qu.:1.0000  
     ##                     Max.   :727   Max.   :23.00   Max.   :7413.0   Max.   :1.0000   Max.   :1.0000  
-    ##  n_non_stop_unique_tokens   num_hrefs      num_self_hrefs      num_imgs         num_videos     average_token_length
-    ##  Min.   :0.0000           Min.   :  0.00   Min.   :  0.00   Min.   :  0.000   Min.   : 0.000   Min.   :0.000       
-    ##  1st Qu.:0.6296           1st Qu.:  4.00   1st Qu.:  1.00   1st Qu.:  1.000   1st Qu.: 0.000   1st Qu.:4.472       
-    ##  Median :0.6960           Median :  7.00   Median :  2.00   Median :  1.000   Median : 0.000   Median :4.661       
-    ##  Mean   :0.6788           Mean   : 10.85   Mean   :  3.09   Mean   :  4.391   Mean   : 1.285   Mean   :4.554       
-    ##  3rd Qu.:0.7609           3rd Qu.: 14.00   3rd Qu.:  4.00   3rd Qu.:  3.000   3rd Qu.: 1.000   3rd Qu.:4.857       
-    ##  Max.   :1.0000           Max.   :186.00   Max.   :116.00   Max.   :108.000   Max.   :91.000   Max.   :6.486       
-    ##   num_keywords    data_channel_is_lifestyle data_channel_is_entertainment data_channel_is_bus data_channel_is_socmed
-    ##  Min.   : 1.000   Min.   :0.0000            Min.   :0.0000                Min.   :0.0000      Min.   :0.00000       
-    ##  1st Qu.: 6.000   1st Qu.:0.0000            1st Qu.:0.0000                1st Qu.:0.0000      1st Qu.:0.00000       
-    ##  Median : 7.000   Median :0.0000            Median :0.0000                Median :0.0000      Median :0.00000       
-    ##  Mean   : 7.211   Mean   :0.0535            Mean   :0.1705                Mean   :0.1459      Mean   :0.05824       
-    ##  3rd Qu.: 9.000   3rd Qu.:0.0000            3rd Qu.:0.0000                3rd Qu.:0.0000      3rd Qu.:0.00000       
-    ##  Max.   :10.000   Max.   :1.0000            Max.   :1.0000                Max.   :1.0000      Max.   :1.00000       
-    ##  data_channel_is_tech data_channel_is_world   kw_min_min       kw_max_min       kw_avg_min        kw_min_max    
-    ##  Min.   :0.0000       Min.   :0.0000        Min.   : -1.00   Min.   :     0   Min.   :   -1.0   Min.   :     0  
-    ##  1st Qu.:0.0000       1st Qu.:0.0000        1st Qu.: -1.00   1st Qu.:   454   1st Qu.:  142.0   1st Qu.:     0  
-    ##  Median :0.0000       Median :0.0000        Median : -1.00   Median :   669   Median :  234.4   Median :  1500  
-    ##  Mean   :0.1735       Mean   :0.2289        Mean   : 26.47   Mean   :  1129   Mean   :  313.1   Mean   : 13314  
-    ##  3rd Qu.:0.0000       3rd Qu.:0.0000        3rd Qu.:  4.00   3rd Qu.:  1000   3rd Qu.:  354.2   3rd Qu.:  7400  
-    ##  Max.   :1.0000       Max.   :1.0000        Max.   :217.00   Max.   :158900   Max.   :39979.0   Max.   :843300  
-    ##    kw_max_max       kw_avg_max       kw_min_avg     kw_max_avg       kw_avg_avg      self_reference_min_shares
-    ##  Min.   : 28000   Min.   :  5362   Min.   :  -1   Min.   :  2195   Min.   :  776.1   Min.   :     0           
-    ##  1st Qu.:843300   1st Qu.:173580   1st Qu.:   0   1st Qu.:  3570   1st Qu.: 2376.3   1st Qu.:   638           
-    ##  Median :843300   Median :246610   Median :1041   Median :  4384   Median : 2859.8   Median :  1200           
-    ##  Mean   :753899   Mean   :260602   Mean   :1113   Mean   :  5634   Mean   : 3146.6   Mean   :  4073           
-    ##  3rd Qu.:843300   3rd Qu.:333000   3rd Qu.:2017   3rd Qu.:  6076   3rd Qu.: 3611.0   3rd Qu.:  2700           
-    ##  Max.   :843300   Max.   :843300   Max.   :3609   Max.   :171030   Max.   :37607.5   Max.   :690400           
-    ##  self_reference_max_shares self_reference_avg_sharess   is_weekend     LDA_00            LDA_01            LDA_02       
-    ##  Min.   :     0            Min.   :     0.0           Min.   :0    Min.   :0.01818   Min.   :0.01818   Min.   :0.01818  
-    ##  1st Qu.:  1000            1st Qu.:   957.5           1st Qu.:0    1st Qu.:0.02505   1st Qu.:0.02502   1st Qu.:0.02857  
-    ##  Median :  2900            Median :  2200.9           Median :0    Median :0.03335   Median :0.03334   Median :0.04003  
-    ##  Mean   : 10762            Mean   :  6593.4           Mean   :0    Mean   :0.17446   Mean   :0.13771   Mean   :0.22968  
-    ##  3rd Qu.:  7800            3rd Qu.:  5200.0           3rd Qu.:0    3rd Qu.:0.22147   3rd Qu.:0.14897   3rd Qu.:0.37560  
-    ##  Max.   :843300            Max.   :690400.0           Max.   :0    Max.   :0.92699   Max.   :0.91998   Max.   :0.92000  
-    ##      LDA_03            LDA_04        global_subjectivity global_sentiment_polarity global_rate_positive_words
-    ##  Min.   :0.01818   Min.   :0.01819   Min.   :0.0000      Min.   :-0.36425          Min.   :0.00000           
-    ##  1st Qu.:0.02580   1st Qu.:0.02857   1st Qu.:0.3983      1st Qu.: 0.05437          1st Qu.:0.02778           
-    ##  Median :0.04000   Median :0.04002   Median :0.4554      Median : 0.11442          Median :0.03829           
-    ##  Mean   :0.23221   Mean   :0.22594   Mean   :0.4464      Mean   : 0.11587          Mean   :0.03897           
-    ##  3rd Qu.:0.40011   3rd Qu.:0.37322   3rd Qu.:0.5117      3rd Qu.: 0.17389          3rd Qu.:0.04950           
-    ##  Max.   :0.92554   Max.   :0.92653   Max.   :0.9500      Max.   : 0.61389          Max.   :0.13699           
-    ##  global_rate_negative_words rate_positive_words rate_negative_words avg_positive_polarity min_positive_polarity
-    ##  Min.   :0.000000           Min.   :0.0000      Min.   :0.0000      Min.   :0.0000        Min.   :0.00000      
-    ##  1st Qu.:0.009868           1st Qu.:0.5926      1st Qu.:0.2000      1st Qu.:0.3061        1st Qu.:0.05000      
-    ##  Median :0.015414           Median :0.7013      Median :0.2857      Median :0.3585        Median :0.10000      
-    ##  Mean   :0.016967           Mean   :0.6755      Mean   :0.2957      Mean   :0.3544        Mean   :0.09792      
-    ##  3rd Qu.:0.022181           3rd Qu.:0.7955      3rd Qu.:0.3913      3rd Qu.:0.4118        3rd Qu.:0.10000      
-    ##  Max.   :0.136929           Max.   :1.0000      Max.   :1.0000      Max.   :1.0000        Max.   :1.00000      
-    ##  max_positive_polarity avg_negative_polarity min_negative_polarity max_negative_polarity title_subjectivity
-    ##  Min.   :0.0000        Min.   :-1.0000       Min.   :-1.0000       Min.   :-1.0000       Min.   :0.0000    
-    ##  1st Qu.:0.6000        1st Qu.:-0.3313       1st Qu.:-0.7000       1st Qu.:-0.1250       1st Qu.:0.0000    
-    ##  Median :0.8000        Median :-0.2581       Median :-0.5000       Median :-0.1000       Median :0.1250    
-    ##  Mean   :0.7503        Mean   :-0.2624       Mean   :-0.5227       Mean   :-0.1104       Mean   :0.2826    
-    ##  3rd Qu.:1.0000        3rd Qu.:-0.1875       3rd Qu.:-0.3000       3rd Qu.:-0.0500       3rd Qu.:0.5000    
-    ##  Max.   :1.0000        Max.   : 0.0000       Max.   : 0.0000       Max.   : 0.0000       Max.   :1.0000    
-    ##  title_sentiment_polarity abs_title_subjectivity abs_title_sentiment_polarity     shares      
-    ##  Min.   :-1.00000         Min.   :0.0000         Min.   :0.0000               Min.   :    22  
-    ##  1st Qu.: 0.00000         1st Qu.:0.1667         1st Qu.:0.0000               1st Qu.:   974  
-    ##  Median : 0.00000         Median :0.5000         Median :0.0000               Median :  1500  
-    ##  Mean   : 0.06736         Mean   :0.3462         Mean   :0.1546               Mean   :  3285  
-    ##  3rd Qu.: 0.13636         3rd Qu.:0.5000         3rd Qu.:0.2500               3rd Qu.:  2700  
-    ##  Max.   : 1.00000         Max.   :0.5000         Max.   :1.0000               Max.   :233400
+    ##  n_non_stop_unique_tokens   num_hrefs      num_self_hrefs      num_imgs         num_videos    
+    ##  Min.   :0.0000           Min.   :  0.00   Min.   :  0.00   Min.   :  0.000   Min.   : 0.000  
+    ##  1st Qu.:0.6296           1st Qu.:  4.00   1st Qu.:  1.00   1st Qu.:  1.000   1st Qu.: 0.000  
+    ##  Median :0.6960           Median :  7.00   Median :  2.00   Median :  1.000   Median : 0.000  
+    ##  Mean   :0.6788           Mean   : 10.85   Mean   :  3.09   Mean   :  4.391   Mean   : 1.285  
+    ##  3rd Qu.:0.7609           3rd Qu.: 14.00   3rd Qu.:  4.00   3rd Qu.:  3.000   3rd Qu.: 1.000  
+    ##  Max.   :1.0000           Max.   :186.00   Max.   :116.00   Max.   :108.000   Max.   :91.000  
+    ##  average_token_length  num_keywords    data_channel_is_lifestyle data_channel_is_entertainment
+    ##  Min.   :0.000        Min.   : 1.000   Min.   :0.0000            Min.   :0.0000               
+    ##  1st Qu.:4.472        1st Qu.: 6.000   1st Qu.:0.0000            1st Qu.:0.0000               
+    ##  Median :4.661        Median : 7.000   Median :0.0000            Median :0.0000               
+    ##  Mean   :4.554        Mean   : 7.211   Mean   :0.0535            Mean   :0.1705               
+    ##  3rd Qu.:4.857        3rd Qu.: 9.000   3rd Qu.:0.0000            3rd Qu.:0.0000               
+    ##  Max.   :6.486        Max.   :10.000   Max.   :1.0000            Max.   :1.0000               
+    ##  data_channel_is_bus data_channel_is_socmed data_channel_is_tech data_channel_is_world   kw_min_min    
+    ##  Min.   :0.0000      Min.   :0.00000        Min.   :0.0000       Min.   :0.0000        Min.   : -1.00  
+    ##  1st Qu.:0.0000      1st Qu.:0.00000        1st Qu.:0.0000       1st Qu.:0.0000        1st Qu.: -1.00  
+    ##  Median :0.0000      Median :0.00000        Median :0.0000       Median :0.0000        Median : -1.00  
+    ##  Mean   :0.1459      Mean   :0.05824        Mean   :0.1735       Mean   :0.2289        Mean   : 26.47  
+    ##  3rd Qu.:0.0000      3rd Qu.:0.00000        3rd Qu.:0.0000       3rd Qu.:0.0000        3rd Qu.:  4.00  
+    ##  Max.   :1.0000      Max.   :1.00000        Max.   :1.0000       Max.   :1.0000        Max.   :217.00  
+    ##    kw_max_min       kw_avg_min        kw_min_max       kw_max_max       kw_avg_max       kw_min_avg  
+    ##  Min.   :     0   Min.   :   -1.0   Min.   :     0   Min.   : 28000   Min.   :  5362   Min.   :  -1  
+    ##  1st Qu.:   454   1st Qu.:  142.0   1st Qu.:     0   1st Qu.:843300   1st Qu.:173580   1st Qu.:   0  
+    ##  Median :   669   Median :  234.4   Median :  1500   Median :843300   Median :246610   Median :1041  
+    ##  Mean   :  1129   Mean   :  313.1   Mean   : 13314   Mean   :753899   Mean   :260602   Mean   :1113  
+    ##  3rd Qu.:  1000   3rd Qu.:  354.2   3rd Qu.:  7400   3rd Qu.:843300   3rd Qu.:333000   3rd Qu.:2017  
+    ##  Max.   :158900   Max.   :39979.0   Max.   :843300   Max.   :843300   Max.   :843300   Max.   :3609  
+    ##    kw_max_avg       kw_avg_avg      self_reference_min_shares self_reference_max_shares
+    ##  Min.   :  2195   Min.   :  776.1   Min.   :     0            Min.   :     0           
+    ##  1st Qu.:  3570   1st Qu.: 2376.3   1st Qu.:   638            1st Qu.:  1000           
+    ##  Median :  4384   Median : 2859.8   Median :  1200            Median :  2900           
+    ##  Mean   :  5634   Mean   : 3146.6   Mean   :  4073            Mean   : 10762           
+    ##  3rd Qu.:  6076   3rd Qu.: 3611.0   3rd Qu.:  2700            3rd Qu.:  7800           
+    ##  Max.   :171030   Max.   :37607.5   Max.   :690400            Max.   :843300           
+    ##  self_reference_avg_sharess   is_weekend     LDA_00            LDA_01            LDA_02       
+    ##  Min.   :     0.0           Min.   :0    Min.   :0.01818   Min.   :0.01818   Min.   :0.01818  
+    ##  1st Qu.:   957.5           1st Qu.:0    1st Qu.:0.02505   1st Qu.:0.02502   1st Qu.:0.02857  
+    ##  Median :  2200.9           Median :0    Median :0.03335   Median :0.03334   Median :0.04003  
+    ##  Mean   :  6593.4           Mean   :0    Mean   :0.17446   Mean   :0.13771   Mean   :0.22968  
+    ##  3rd Qu.:  5200.0           3rd Qu.:0    3rd Qu.:0.22147   3rd Qu.:0.14897   3rd Qu.:0.37560  
+    ##  Max.   :690400.0           Max.   :0    Max.   :0.92699   Max.   :0.91998   Max.   :0.92000  
+    ##      LDA_03            LDA_04        global_subjectivity global_sentiment_polarity
+    ##  Min.   :0.01818   Min.   :0.01819   Min.   :0.0000      Min.   :-0.36425         
+    ##  1st Qu.:0.02580   1st Qu.:0.02857   1st Qu.:0.3983      1st Qu.: 0.05437         
+    ##  Median :0.04000   Median :0.04002   Median :0.4554      Median : 0.11442         
+    ##  Mean   :0.23221   Mean   :0.22594   Mean   :0.4464      Mean   : 0.11587         
+    ##  3rd Qu.:0.40011   3rd Qu.:0.37322   3rd Qu.:0.5117      3rd Qu.: 0.17389         
+    ##  Max.   :0.92554   Max.   :0.92653   Max.   :0.9500      Max.   : 0.61389         
+    ##  global_rate_positive_words global_rate_negative_words rate_positive_words rate_negative_words
+    ##  Min.   :0.00000            Min.   :0.000000           Min.   :0.0000      Min.   :0.0000     
+    ##  1st Qu.:0.02778            1st Qu.:0.009868           1st Qu.:0.5926      1st Qu.:0.2000     
+    ##  Median :0.03829            Median :0.015414           Median :0.7013      Median :0.2857     
+    ##  Mean   :0.03897            Mean   :0.016967           Mean   :0.6755      Mean   :0.2957     
+    ##  3rd Qu.:0.04950            3rd Qu.:0.022181           3rd Qu.:0.7955      3rd Qu.:0.3913     
+    ##  Max.   :0.13699            Max.   :0.136929           Max.   :1.0000      Max.   :1.0000     
+    ##  avg_positive_polarity min_positive_polarity max_positive_polarity avg_negative_polarity
+    ##  Min.   :0.0000        Min.   :0.00000       Min.   :0.0000        Min.   :-1.0000      
+    ##  1st Qu.:0.3061        1st Qu.:0.05000       1st Qu.:0.6000        1st Qu.:-0.3313      
+    ##  Median :0.3585        Median :0.10000       Median :0.8000        Median :-0.2581      
+    ##  Mean   :0.3544        Mean   :0.09792       Mean   :0.7503        Mean   :-0.2624      
+    ##  3rd Qu.:0.4118        3rd Qu.:0.10000       3rd Qu.:1.0000        3rd Qu.:-0.1875      
+    ##  Max.   :1.0000        Max.   :1.00000       Max.   :1.0000        Max.   : 0.0000      
+    ##  min_negative_polarity max_negative_polarity title_subjectivity title_sentiment_polarity
+    ##  Min.   :-1.0000       Min.   :-1.0000       Min.   :0.0000     Min.   :-1.00000        
+    ##  1st Qu.:-0.7000       1st Qu.:-0.1250       1st Qu.:0.0000     1st Qu.: 0.00000        
+    ##  Median :-0.5000       Median :-0.1000       Median :0.1250     Median : 0.00000        
+    ##  Mean   :-0.5227       Mean   :-0.1104       Mean   :0.2826     Mean   : 0.06736        
+    ##  3rd Qu.:-0.3000       3rd Qu.:-0.0500       3rd Qu.:0.5000     3rd Qu.: 0.13636        
+    ##  Max.   : 0.0000       Max.   : 0.0000       Max.   :1.0000     Max.   : 1.00000        
+    ##  abs_title_subjectivity abs_title_sentiment_polarity     shares      
+    ##  Min.   :0.0000         Min.   :0.0000               Min.   :    22  
+    ##  1st Qu.:0.1667         1st Qu.:0.0000               1st Qu.:   974  
+    ##  Median :0.5000         Median :0.0000               Median :  1500  
+    ##  Mean   :0.3462         Mean   :0.1546               Mean   :  3285  
+    ##  3rd Qu.:0.5000         3rd Qu.:0.2500               3rd Qu.:  2700  
+    ##  Max.   :0.5000         Max.   :1.0000               Max.   :233400
 
 ``` r
 # create a new variable "dataType" to be able to graph the frequency of the data channel type. 
@@ -1064,10 +1080,11 @@ bt1
     ##   3                  150      8053.372  0.006021258  3050.159
     ## 
     ## Tuning parameter 'shrinkage' was held constant at a value of 0.1
-    ## Tuning parameter 'n.minobsinnode' was held constant at
-    ##  a value of 10
+    ## Tuning parameter 'n.minobsinnode' was
+    ##  held constant at a value of 10
     ## RMSE was used to select the optimal model using the smallest value.
-    ## The final values used for the model were n.trees = 50, interaction.depth = 2, shrinkage = 0.1 and n.minobsinnode = 10.
+    ## The final values used for the model were n.trees = 50, interaction.depth = 2, shrinkage = 0.1
+    ##  and n.minobsinnode = 10.
 
 ``` r
 bt2 <- train(shares ~ self_reference_min_shares + kw_avg_avg + num_imgs + num_videos , 
@@ -1716,10 +1733,11 @@ bt2
     ##   3                  150      7964.944  0.01849173  3021.817
     ## 
     ## Tuning parameter 'shrinkage' was held constant at a value of 0.1
-    ## Tuning parameter 'n.minobsinnode' was held constant at
-    ##  a value of 10
+    ## Tuning parameter 'n.minobsinnode' was
+    ##  held constant at a value of 10
     ## RMSE was used to select the optimal model using the smallest value.
-    ## The final values used for the model were n.trees = 50, interaction.depth = 1, shrinkage = 0.1 and n.minobsinnode = 10.
+    ## The final values used for the model were n.trees = 50, interaction.depth = 1, shrinkage = 0.1
+    ##  and n.minobsinnode = 10.
 
 ``` r
 bt3 <- train(shares ~ num_keywords + global_rate_positive_words + title_subjectivity + is_weekend ,
@@ -2368,10 +2386,11 @@ bt3
     ##   3                  150      8120.660  0.002762310  3141.777
     ## 
     ## Tuning parameter 'shrinkage' was held constant at a value of 0.1
-    ## Tuning parameter 'n.minobsinnode' was held constant at
-    ##  a value of 10
+    ## Tuning parameter 'n.minobsinnode' was
+    ##  held constant at a value of 10
     ## RMSE was used to select the optimal model using the smallest value.
-    ## The final values used for the model were n.trees = 50, interaction.depth = 1, shrinkage = 0.1 and n.minobsinnode = 10.
+    ## The final values used for the model were n.trees = 50, interaction.depth = 1, shrinkage = 0.1
+    ##  and n.minobsinnode = 10.
 
 ``` r
 # bt1 has the smallest rmse
@@ -2410,3 +2429,25 @@ minRMSE
 
 Our models are not very good, but the better model is shown above using
 our `minRMSE` object.
+
+Adding the linear model for secondary analysis
+
+``` r
+lm1 <- train(shares ~ n_tokens_content + n_tokens_title + num_imgs + num_videos , 
+             data = dataTrain, method = "lm", preProcess = c("center","scale"),
+             trControl = trainControl(method="cv", number = 10))
+lm1$results
+```
+
+    ##   intercept     RMSE    Rsquared      MAE   RMSESD RsquaredSD    MAESD
+    ## 1      TRUE 7718.557 0.007369062 3002.992 3380.238 0.01069431 494.8932
+
+``` r
+#fit on test set
+lmPred <- predict(lm1, newdata = select(dataTest, -shares))
+
+#Compute RMSE
+sqrt(mean(lmPred - dataTest$shares)^2)
+```
+
+    ## [1] NA
